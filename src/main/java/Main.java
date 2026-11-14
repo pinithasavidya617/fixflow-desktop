@@ -1,4 +1,6 @@
-import com.fixflow.database.DatabaseManager;
+package com.fixflow;
+
+import com.fixflow.database.DatabaseInitializer;
 import com.fixflow.database.UserDB;
 import com.fixflow.ui.LoginFrame;
 import com.fixflow.ui.SetupFrame;
@@ -14,12 +16,12 @@ public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        // Initialize FlatLaf
+        // Apply FlatLaf
         FlatLightLaf.setup();
 
         // Initialize SQLite local database and create schema
         try {
-            DatabaseManager.initializeDatabase();
+            DatabaseInitializer.initializeDatabase();
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize SQLite database.", e);
             JOptionPane.showMessageDialog(
@@ -31,7 +33,7 @@ public class Main {
             return;
         }
 
-        // Check whether first-launch setup or normal login is required
+        // Determine first launch setup or normal login is required
         boolean setupNeeded = true;
         try {
             setupNeeded = UserDB.isSetupRequired();
@@ -41,7 +43,7 @@ public class Main {
 
         final boolean isFirstLaunch = setupNeeded;
 
-        // Launch user interface on the Swing Event Dispatch Thread
+        // Launch user interface on the Swing
         SwingUtilities.invokeLater(() -> {
             if (isFirstLaunch) {
                 LOGGER.info("Initial setup required. Launching SetupFrame wizard.");
