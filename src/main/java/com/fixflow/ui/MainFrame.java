@@ -50,6 +50,7 @@ public class MainFrame extends JFrame {
         selectNavigation(NavigationItem.DASHBOARD);
     }
 
+
     private JPanel createTopBar() {
         JPanel bar = new JPanel(new BorderLayout());
         bar.setPreferredSize(new Dimension(0, 52));
@@ -162,7 +163,6 @@ public class MainFrame extends JFrame {
             case TECHNICIANS -> new TechnicianPanel();
             case INVENTORY -> new InventoryPanel();
             case PAYMENTS -> new PaymentPanel();
-            case WARRANTIES -> new WarrantyPanel();
             case REPORTS -> new ReportsPanel();
             case SETTINGS -> new SettingsPanel();
         };

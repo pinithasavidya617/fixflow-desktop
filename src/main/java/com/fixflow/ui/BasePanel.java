@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-
 public abstract class BasePanel extends JPanel {
 
     private final String title;
@@ -20,7 +19,6 @@ public abstract class BasePanel extends JPanel {
 
         add(createHeaderPanel(), BorderLayout.NORTH);
 
-        // Content area for subclasses
         contentArea = new JPanel();
         add(contentArea, BorderLayout.CENTER);
     }

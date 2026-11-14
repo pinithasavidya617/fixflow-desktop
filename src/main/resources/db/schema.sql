@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS devices (
     serial_number TEXT,
     colour TEXT,
     accessories TEXT,
+    warranty_months INTEGER DEFAULT 0,
+    warranty_start_date TEXT,
+    warranty_expiry_date TEXT,
     created_at TEXT NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE RESTRICT
 );
@@ -46,22 +49,18 @@ CREATE TABLE IF NOT EXISTS repair_jobs (
     technician_id INTEGER,
     date_received TEXT NOT NULL,
     initial_problem TEXT NOT NULL,
-    current_status TEXT NOT NULL,
+    current_status TEXT NOT NULL CHECK (current_status IN ('RECEIVED', 'DIAGNOSING', 'IN_PROGRESS', 'COMPLETED', 'COLLECTED', 'CANCELLED')),
     diagnosis_findings TEXT,
     estimated_cost REAL,
     labour_charges REAL DEFAULT 0.0,
     estimated_completion_date TEXT,
     actual_completion_date TEXT,
-    approval_status TEXT NOT NULL DEFAULT 'PENDING' CHECK (approval_status IN ('PENDING', 'APPROVED', 'REJECTED')),
-    approval_date TEXT,
-    cancellation_reason TEXT,
-    original_job_id INTEGER,
+    notes TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE RESTRICT,
     FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE RESTRICT,
-    FOREIGN KEY (technician_id) REFERENCES technicians(technician_id) ON DELETE RESTRICT,
-    FOREIGN KEY (original_job_id) REFERENCES repair_jobs(job_id) ON DELETE SET NULL
+    FOREIGN KEY (technician_id) REFERENCES technicians(technician_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS spare_parts (
@@ -90,35 +89,13 @@ CREATE TABLE IF NOT EXISTS repair_part_usage (
 
 CREATE TABLE IF NOT EXISTS payments (
     payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER UNIQUE NOT NULL,
+    job_id INTEGER NOT NULL,
     payment_date TEXT NOT NULL,
-    total_repair_cost REAL NOT NULL CHECK (total_repair_cost >= 0),
     amount_paid REAL NOT NULL CHECK (amount_paid >= 0),
     payment_method TEXT NOT NULL DEFAULT 'CASH',
-    payment_status TEXT NOT NULL DEFAULT 'PAID',
-    created_at TEXT NOT NULL,
-    FOREIGN KEY (job_id) REFERENCES repair_jobs(job_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS warranties (
-    warranty_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER UNIQUE NOT NULL,
-    start_date TEXT NOT NULL,
-    expiry_date TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'EXPIRED', 'CLAIMED')),
-    created_at TEXT NOT NULL,
-    FOREIGN KEY (job_id) REFERENCES repair_jobs(job_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS repair_status_history (
-    history_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL,
-    from_status TEXT,
-    to_status TEXT NOT NULL,
-    changed_by_role TEXT,
-    change_date TEXT NOT NULL,
     notes TEXT,
-    FOREIGN KEY (job_id) REFERENCES repair_jobs(job_id) ON DELETE CASCADE
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (job_id) REFERENCES repair_jobs(job_id) ON DELETE RESTRICT
 );
 
 CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
@@ -128,6 +105,4 @@ CREATE INDEX IF NOT EXISTS idx_repair_jobs_device ON repair_jobs(device_id);
 CREATE INDEX IF NOT EXISTS idx_repair_jobs_technician ON repair_jobs(technician_id);
 CREATE INDEX IF NOT EXISTS idx_repair_jobs_status ON repair_jobs(current_status);
 CREATE INDEX IF NOT EXISTS idx_part_usage_job ON repair_part_usage(job_id);
-CREATE INDEX IF NOT EXISTS idx_warranties_job ON warranties(job_id);
-CREATE INDEX IF NOT EXISTS idx_status_history_job ON repair_status_history(job_id);
-
+CREATE INDEX IF NOT EXISTS idx_payments_job ON payments(job_id);
