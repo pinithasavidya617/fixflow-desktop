@@ -31,7 +31,7 @@ public class ValidationUtil {
 
     public static boolean isValidOptionalEmail(String email) {
         if (!isNotEmpty(email)) {
-            return true; // Optional field
+            return true;
         }
         return EMAIL_PATTERN.matcher(email.trim()).matches();
     }
